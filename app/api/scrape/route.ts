@@ -15,6 +15,8 @@ export async function POST(request: NextRequest) {
       )
     }
     
+    console.log(`\n🔵 API: Received scraping request for scraper ID: ${scraperId}`);
+    
     // Fetch scraper configuration
     const scraperResponse = await cosmic.objects.findOne({
       type: 'scrapers',
@@ -30,6 +32,10 @@ export async function POST(request: NextRequest) {
       )
     }
     
+    console.log(`📋 Scraper found: ${scraper.title}`);
+    console.log(`🌐 URL: ${scraper.metadata?.url}`);
+    console.log(`🚀 Use Puppeteer: ${scraper.metadata?.use_puppeteer}`);
+    
     const startTime = Date.now()
     
     try {
@@ -40,10 +46,14 @@ export async function POST(request: NextRequest) {
       const scrapedData = await executeScraping({
         url: scraper.metadata?.url || '',
         selectors,
-        usePuppeteer: scraper.metadata?.use_puppeteer || false, // Changed: Use Puppeteer flag
+        usePuppeteer: scraper.metadata?.use_puppeteer || false,
+        timeout: 60000 // Changed: 60 second timeout for complex sites
       })
       
       const executionTime = Date.now() - startTime
+      
+      console.log(`✅ Scraping completed in ${executionTime}ms`);
+      console.log(`📊 Items scraped: ${scrapedData.length}`);
       
       // Save result to Cosmic
       await cosmic.objects.insertOne({
@@ -56,7 +66,7 @@ export async function POST(request: NextRequest) {
           items_count: scrapedData.length,
           execution_time: executionTime,
           timestamp: new Date().toISOString(),
-          scraping_method: scraper.metadata?.use_puppeteer ? 'puppeteer' : 'cheerio', // Changed: Track method used
+          scraping_method: scraper.metadata?.use_puppeteer ? 'puppeteer' : 'cheerio',
         },
       })
       
@@ -69,6 +79,8 @@ export async function POST(request: NextRequest) {
         },
       })
       
+      console.log(`💾 Results saved to Cosmic`);
+      
       return NextResponse.json({
         success: true,
         data: scrapedData,
@@ -79,6 +91,8 @@ export async function POST(request: NextRequest) {
     } catch (scrapingError) {
       const executionTime = Date.now() - startTime
       const errorMessage = scrapingError instanceof Error ? scrapingError.message : 'Unknown error'
+      
+      console.error(`❌ Scraping failed: ${errorMessage}`);
       
       // Save error result
       await cosmic.objects.insertOne({
@@ -108,6 +122,8 @@ export async function POST(request: NextRequest) {
         { status: 404 }
       )
     }
+    
+    console.error(`❌ API Error:`, error);
     
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Unknown error' },
