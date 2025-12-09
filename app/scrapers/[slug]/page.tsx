@@ -1,3 +1,4 @@
+// app/scrapers/[slug]/page.tsx
 import { cosmic, hasStatus } from '@/lib/cosmic'
 import type { Scraper, ScrapingResult } from '@/types'
 import Link from 'next/link'
@@ -74,6 +75,12 @@ export default async function ScraperDetailPage({
             <div>
               <h1 className="text-3xl font-bold">{scraper.title}</h1>
               <p className="text-gray-400 mt-2">{scraper.metadata?.url}</p>
+              {/* Changed: Added Puppeteer badge */}
+              {scraper.metadata?.use_puppeteer && (
+                <span className="inline-block mt-2 px-3 py-1 bg-purple-500/20 text-purple-400 text-xs rounded-full">
+                  🚀 Mode Puppeteer (JavaScript activé)
+                </span>
+              )}
             </div>
             <div className="flex gap-3">
               <ScraperExecuteButton scraperId={scraper.id} />
@@ -96,6 +103,14 @@ export default async function ScraperDetailPage({
                   <div className="text-sm text-gray-400 mb-1">Statut</div>
                   <span className={`px-2 py-1 rounded text-sm ${scraper.metadata?.active ? 'bg-success/20 text-success' : 'bg-gray-700 text-gray-400'}`}>
                     {scraper.metadata?.active ? 'Actif' : 'Inactif'}
+                  </span>
+                </div>
+                
+                {/* Changed: Added scraping method indicator */}
+                <div>
+                  <div className="text-sm text-gray-400 mb-1">Méthode de Scraping</div>
+                  <span className={`px-2 py-1 rounded text-sm ${scraper.metadata?.use_puppeteer ? 'bg-purple-500/20 text-purple-400' : 'bg-blue-500/20 text-blue-400'}`}>
+                    {scraper.metadata?.use_puppeteer ? 'Puppeteer (JavaScript)' : 'Cheerio (HTML statique)'}
                   </span>
                 </div>
                 
@@ -160,6 +175,12 @@ export default async function ScraperDetailPage({
                               {result.metadata?.status === 'Success' ? 'Succès' : 'Échec'}
                             </span>
                             <span className="text-sm text-gray-400">{formattedDate}</span>
+                            {/* Changed: Added scraping method badge */}
+                            {result.metadata?.scraping_method && (
+                              <span className={`text-xs px-2 py-0.5 rounded ${result.metadata.scraping_method === 'puppeteer' ? 'bg-purple-500/20 text-purple-400' : 'bg-blue-500/20 text-blue-400'}`}>
+                                {result.metadata.scraping_method === 'puppeteer' ? 'Puppeteer' : 'Cheerio'}
+                              </span>
+                            )}
                           </div>
                           
                           <div className="flex items-center gap-4 text-sm text-gray-400">

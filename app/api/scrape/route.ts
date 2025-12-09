@@ -36,10 +36,11 @@ export async function POST(request: NextRequest) {
       // Validate and parse selectors
       const selectors = validateSelectors(scraper.metadata?.selectors || '{}')
       
-      // Execute scraping
+      // Execute scraping with Puppeteer flag if specified
       const scrapedData = await executeScraping({
         url: scraper.metadata?.url || '',
         selectors,
+        usePuppeteer: scraper.metadata?.use_puppeteer || false, // Changed: Use Puppeteer flag
       })
       
       const executionTime = Date.now() - startTime
@@ -55,6 +56,7 @@ export async function POST(request: NextRequest) {
           items_count: scrapedData.length,
           execution_time: executionTime,
           timestamp: new Date().toISOString(),
+          scraping_method: scraper.metadata?.use_puppeteer ? 'puppeteer' : 'cheerio', // Changed: Track method used
         },
       })
       

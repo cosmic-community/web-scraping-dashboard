@@ -22,6 +22,7 @@ export interface Scraper extends CosmicObject {
     total_runs?: number;
     success_rate?: number;
     description?: string;
+    use_puppeteer?: boolean; // Changed: Added flag for Puppeteer usage
   };
 }
 
@@ -36,6 +37,7 @@ export interface ScrapingResult extends CosmicObject {
     execution_time?: number;
     timestamp: string;
     error_message?: string;
+    scraping_method?: 'cheerio' | 'puppeteer'; // Changed: Added method tracking
   };
 }
 
